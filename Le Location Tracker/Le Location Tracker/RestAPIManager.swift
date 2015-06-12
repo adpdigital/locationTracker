@@ -16,6 +16,7 @@ class RestAPIManager: NSObject {
     static let sharedInstance = RestAPIManager()
     static let url = NSURL(string:"http://track-my-location.herokuapp.com/")
     //static let deviceID = NSUUID().UUIDString
+    
     static let deviceID = UIDevice.currentDevice().modelName
     
     func sendDeviceTrackedData(locations: NSArray!, onCompletion: Response) {
