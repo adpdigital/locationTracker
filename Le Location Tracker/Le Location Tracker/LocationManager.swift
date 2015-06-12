@@ -98,9 +98,21 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
                 }
                 
                 var loadedLocationArray = DataManager.sharedInstance.loadUnsynchronized() as [Location]
-                println(loadedLocationArray)
-                RestAPIManager.sharedInstance.sendDeviceTrackedData(loadedLocationArray, onCompletion: {json, err in })
                 
+                RestAPIManager.sharedInstance.sendDeviceTrackedData(loadedLocationArray, callback: { json, err in
+                    
+                    var status = json["status"]
+                    
+                    if status == 200 || status == "OK" {
+                        for var i = 0; i < loadedLocationArray.count; i++ {
+                            var location: Location = loadedLocationArray[i]
+                            location.isSyncWithServer == true
+                            println("location synchronized!")
+                        }
+                    } else {
+                        println(status)
+                    }
+                })
             } else {
                 println("Error :(")
             }

@@ -22,8 +22,6 @@ class Location: NSManagedObject {
         var latLonDict = ["lon":self.longitude, "lat":self.latitude]
         var locDict = ["loc":latLonDict, "time":(updateTime.timeIntervalSince1970)*1000]
         
-        
-        
         return locDict
     }
 }

@@ -9,24 +9,24 @@
 import Foundation
 import UIKit
 
-typealias Response = (JSON, NSError?) -> Void
+typealias ResponseFromServer = (JSON, NSError?) -> Void
 
 class RestAPIManager: NSObject {
     
     static let sharedInstance = RestAPIManager()
     static let url = NSURL(string:"http://track-my-location.herokuapp.com/")
-    //static let deviceID = NSUUID().UUIDString
+    static let deviceID = UIDevice.currentDevice().modelName //static let uuid = NSUUID().UUIDString
     
-    static let deviceID = UIDevice.currentDevice().modelName
-    
-    func sendDeviceTrackedData(locations: NSArray!, onCompletion: Response) {
+    func sendDeviceTrackedData(locations: NSArray!, callback: ResponseFromServer) {
         
         var modifLocations: NSMutableArray = NSMutableArray()
+        
         for var i = 0; i < locations.count; i++ {
             let loc: Location = locations.objectAtIndex(i) as! Location
             var locationDict = loc.locationToDictionary()
             modifLocations.addObject(locationDict as NSDictionary)
         }
+        
         var postRequestData = ["device_id":RestAPIManager.deviceID, "track":modifLocations]
         
         let urlPost = NSURL(string:"http://track-my-location.herokuapp.com/track/add")
@@ -37,17 +37,17 @@ class RestAPIManager: NSObject {
         var err: NSError?
         var data: NSData = NSJSONSerialization.dataWithJSONObject(postRequestData, options: nil, error: &err)!
         
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         var length = NSString(format: "%d", data.length) as String
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.setValue(length, forHTTPHeaderField: "Content-Length")
         request.setValue("json", forHTTPHeaderField: "Data-Type")
-        
         request.HTTPBody = data
         
         let task = session.dataTaskWithRequest(request, completionHandler: {
             data, response, error -> Void in
             let json:JSON = JSON(data: data)
-            onCompletion(json, err)
+            callback(json, err)
+            //var status = json["status"]
         })
         task.resume()
     }
@@ -76,6 +76,7 @@ private let DeviceList = [
 extension UIDevice {
     
     var modelName: String {
+        
         var systemInfo = utsname()
         uname(&systemInfo)
         
@@ -90,7 +91,6 @@ extension UIDevice {
         }
         return DeviceList[identifier] ?? identifier
     }
-    
 }
 
 
